@@ -1,0 +1,469 @@
+= Informe del trabajo practico de BD1
+
+Autores:
+
+- Maximiliano Alegre <maxialegre2003@gmail.com>
+
+- Pablo Galvan <pablogalvan15plus@gmail.com>
+
+- Mariana Madariaga <marianamad97@gmail.com>
+
+- Matias Meira <matiasmeiraeeuu@gmail.com>
+
+v1, {docdate}. Docentes Daniel Bertaccini y Hernán Rondelli (COM-02)
+
+== Introducción
+
+El siguiente informe explicará el funcionamiento del programa junto a sus dificultades y una breve explicación de cada 
+función implementada para modelar el problema. El programa gestiona el sistema de Centro de Atención Telefónica de la 
+empresa Skynet el cuál tiene la finalidad de; administrar las llamadas realizadas por los clientes solicitando soporte o 
+iniciando un reclamo, organizar los operadores disponibles y asignarlos a cada llamado en espera y permitir el alta de un 
+trámite asociado a un cliente basado en el motivo de su consulta/reclamo. 
+
+
+== Descripción
+
+La aplicación es un programa simple command line que muestra un menú de ocho opciones numéricas que se seleccionan al 
+ingresar su correspondiente número por teclado, dichas opciones son:
+
+* Crear base de datos: Crea una base de datos relacional (SQL) llamada `alegre_galvan_madariaga_meira_db1` y elimina si ya 
+existía una con dicho nombre.
+* Crear tablas: Crea las tablas (relaciones) necesarias para modelar el problema planteado.
+* Agregar PKs y FK: Crea las respectivas Primary Key (PK) y Foreign Key (FK) de cada tabla.
+* Eliminar PKs y FK: Elimina todas las claves de cada relación.
+* Cargar datos: Carga los datos de los clientes, operadores y los datos de prueba utilizados para la simulación de 
+una secuencia de llamadas y atenciones. 
+* Crear stored procedures y triggers: Carga a la base de datos las funcionalidades y el trigger asociado a la 
+tabla de cola atención.
+* Iniciar pruebas: Ejecuta una instancia del problema en base a los datos cargados anteriormente y utilizando las 
+funcionalidades cargadas a la base de datos.
+* Cargar datos en BoltDB: Carga en la base de datos no relacional (NoSQL) una serie de veinte clientes, tres operadores, 
+tres llamados finalizados y tres trámites cerrados.
+* Mostrar datos de BoltDB: Muestra por pantalla todos los datos de la base de datos no relacional (NoSQL).
+
+Respecto a las dificultades, se puede mencionar un error al eliminar las primary y foreign keys que se solucionó eliminando primero las foreign keys de las tablas y luego las primary keys. También ocurrió un error con el manejo de null en los atributos de tiempo, ya que al momento de realizar un cálculo, como sumar una hora o calcular el promedio, el valor no se actualizaba, manteniendose en null. Por lo tanto, en las tablas como rendimiento operadore se optó por inicializar las variables de tiempo en 00:00:00 permitiendo así realizar cálculos de tiempo. Por último, se decidió por tener todas las funcionalidades en archivos separados favoreciendo así el desacoplamiento y la división de tareas entre los integrantes del equipo.
+
+
+== Implementación
+
+El siguiente código corresponde al programa del menú el cuál se encuentra programado en el lenguaje GO. Según la opción que elija el usuario, se ejecutarán los métodos que realizan los llamados a las funciones de la base de datos relacional y no relacional.
+[source,go]
+----
+func mostrarMenu() {
+	fmt.Printf("### MENÚ ###\n")
+	fmt.Printf("1 Crear base de datos\n")
+	fmt.Printf("2 Crear tablas\n")
+	fmt.Printf("3 Agregar PKs y FKs\n")
+	fmt.Printf("4 Eliminar PKs y FKs\n")
+	fmt.Printf("5 Cargar datos\n")
+	fmt.Printf("6 Crear stores procedures y triggers\n")
+	fmt.Printf("7 Iniciar pruebas\n")
+	fmt.Printf("8 Cargar datos en BoltDB\n")
+	fmt.Printf("9 Mostrar datos de BoltDB\n")
+	fmt.Printf("0 Salir\n")
+}
+
+func opcionElegida() {
+	var opcion int
+
+	for {
+		fmt.Scanf("%d", &opcion)
+		switch opcion {
+		case 1:
+			crearBD()
+			fmt.Println("Base de datos creada")
+
+		case 2:
+			crearTablas()
+			fmt.Println("Tablas creadas")
+
+		case 3:
+			crearPKs()
+			crearFKs()
+			fmt.Println("PKs y FKs agregadas")
+
+		case 4:
+			eliminarFKs()
+			eliminarPKs()
+			fmt.Println("PKs y FKs eliminadas")
+			
+		case 5:
+			cargarClientes()
+			cargarOperadores()
+			cargarDatosDePrueba()
+			fmt.Println("Datos cargados")
+
+		case 6:
+			cargarStoredProcedures()
+			cargarTriggers()
+			fmt.Println("Stored procedures y triggers cargados")
+
+		case 7:
+			iniciarPruebas()
+			fmt.Println("Pruebas iniciadas")
+
+		case 8:
+			db_bolt.CargarDatosEnBoltDB()
+			fmt.Println("Datos cargados en BoltBD")
+
+		case 9:
+			db_bolt.MostrarDatosDeBoltDB()
+			fmt.Println("Datos mostrados de BoltDB")
+			mostrarMenu()
+
+		case 0:
+			fmt.Println("Salir")
+			return
+
+		default:
+			fmt.Println("Opción no válida")
+		}
+	}
+
+}
+
+func main() {
+	mostrarMenu()
+	opcionElegida()
+
+}
+
+----
+
+Las siguientes funciones corresponden a las implementadas en el lenguaje SQL.
+
+- `crearPedido():` Tiene como finalidad recibir un id de cliente, en caso de ser válido, 
+lo agrega a la cola de atención con fecha y hora de inicio de llamado, dejando su estado `en espera`. 
+Caso contrario, devuelve un error con el mensaje correspondiente. Si se logra agregar a la cola devuelve 
+el id de la cola de atención, de otro modo, devuelve `-1`.
+[source,sql]
+----
+create or replace function ingresoLlamado(idCLiente int) returns int as $$
+declare
+	idColaAtencion int;
+begin
+	if (select count(*) from cliente where id_cliente = idCliente) = 0 then
+		insert into error (id_error, operacion, f_error, motivo)
+			   values (generarIDError(), 'nuevo llamado', current_timestamp, 'id de cliente no valido');
+		return -1;
+	end if;
+
+	idColaAtencion := generarIDColaAtencion();
+	insert into cola_atencion(id_cola_atencion, id_cliente, f_inicio_llamado, estado)
+		   values (idColaAtencion, idCliente, current_timestamp, 'en espera');
+	return idColaAtencion;
+end;
+$$ language plpgsql;
+----
+- `desistimiento de llamado():` Su función es recibir un id de cola de atención, verifica la existencia del id y además, 
+comprueba que el estado del llamado sea `en espera` o `en línea`. Si ambas validaciones son correctas, se marca al 
+llamado como `desistido` y, si estaba `en línea`, también actualiza la fecha y hora de fin del llamado y por último, 
+se retorna `true`. Si alguna comprobación falla, devuelve `false` y agrega un registro a la tabla de error.
+[source,sql]
+----
+create or replace function desistimientoDeLlamado(idColaAtencion int) returns boolean as $$
+begin
+    if (select count(*) from cola_atencion where id_cola_atencion = idColaAtencion) = 0 then
+        insert into error (id_error, operacion, f_error, motivo)
+        values (generarIDError(), 'baja llamado', current_timestamp, 'id de cola de atencion no valido');
+        return false;
+    end if;
+
+    if (select estado from cola_atencion where id_cola_atencion = idColaAtencion) not in ('en espera', 'en linea') then
+        insert into error (id_error, operacion, f_error, motivo)
+        values (generarIDError(), 'baja llamado', current_timestamp, 'el llamado no esta en espera ni en linea');
+        return false;
+    end if;
+
+    if (select estado from cola_atencion where id_cola_atencion = idColaAtencion) = 'en linea' then
+        update cola_atencion
+        set estado = 'desistido', f_fin_atencion = current_timestamp
+        where id_cola_atencion = idColaAtencion;
+    else
+        update cola_atencion
+        set estado = 'desistido'
+        where id_cola_atencion = idColaAtencion;
+    end if;
+
+    return true;
+end;
+$$ language plpgsql;
+
+----
+
+- `atencion-llamado-en-espera():` Tiene como propósito asignar un operador disponible al primer llamado (según su fecha 
+e inicio) en espera de la cola. Primero, valida existe al menos un llamado `en espera` y si hay al menos un operador 
+disponible. Si las validaciones son correctas, se selecciona un operador disponible, se actualiza su estado a `no disponible`, 
+y lo se asigna al primer llamado de la cola, cambiando el estado del cliente a `en línea`, registrando la fecha y 
+hora de inicio de la atención. Si alguna validación falla o algún paso no se puede completar, se deshacen las 
+acciones realizadas hasta ese punto. Por último, la función retorna `true` si la asignación se realiza correctamente, 
+o `false` si no.
+[source,sql]
+----
+create or replace function atención_llamado_en_espera() returns boolean as $$
+	declare 
+	id_op int;
+	id_llamado_en_espera int;
+
+	begin
+		id_op = -1;
+		id_llamado_en_espera = -1;
+		if ( (select COUNT(id_operadore) from operadore where disponible = TRUE) > 0 AND 
+			(select COUNT(id_cola_atencion) from cola_atencion where estado = 'en espera') > 0 ) THEN
+		         id_op := (SELECT id_operadore 
+		                  FROM operadore
+		                  WHERE disponible = true
+		                  LIMIT 1);
+ 
+                  id_llamado_en_espera:=(select id_cola_atencion
+			       from cola_atencion
+			       where estado='en espera'
+			       order by f_inicio_llamado ASC
+			       LIMIT 1);
+			       
+				   update cola_atencion set id_operadore=id_op,f_inicio_atencion=current_timestamp, 
+                   estado='en linea' where id_cola_atencion=id_llamado_en_espera;
+
+                   update operadore o set disponible = 'false' where o.id_operadore = id_op;
+			       return true;
+
+		elsif(select count (id_cola_atencion) from cola_atencion where estado='en espera')<1  THEN 
+		  insert into error(id_error, operacion, f_error, motivo) values
+		  (generarIDError(),'atencion_llamado',CURRENT_TIMESTAMP, '? no existe ningun llamado en espera'); 
+		  return false;
+
+		elsif(select count(id_operadore) from operadore where disponible=true)<1 THEN
+		  insert into error(id_error, operacion, f_error, motivo) values
+		  (generarIDError(),'atencion_llamado',CURRENT_TIMESTAMP, '? no existe ningune operadore disponible'); 
+		  return false;
+
+		end if;
+	end;
+       $$ language plpgsql;
+
+
+----
+
+- `alta-de-tramite():` Su objetivo es recibir un id de cola de atención, un tipo de trámite y una descripción. 
+Se verifica que el tipo de trámite sea `consulta` o `reclamo` y que el id de cola de atención exista y que su estado 
+no esté en `en espera`. Si las validaciones pasan satisfactoriamente, crea un nuevo trámite en la tabla 
+correspondiente con los datos proporcionados y retorna el id del trámite; si alguna comprobación falla, retorna `-1`.
+[source,sql]
+----
+create or replace function alta_de_tramite(id_at int, tipo_de_tramite char, descr text) returns int as $$
+	declare 
+	id_tram int;
+	id_c int;
+	
+
+	begin
+		id_tram = -1;
+		id_c = 0;
+		if not (tipo_de_tramite='consulta' or tipo_de_tramite='reclamo') THEN
+				insert into error(id_error,operacion, f_error, motivo) values
+				(generarIDError(),'alta tramite', CURRENT_TIMESTAMP, '? tipo de tramite no válido');
+
+				return id_tram;
+
+		elsif(exists(select 1 from cola_atencion where id_cola_atencion=id_at))  AND
+			     (select estado from cola_atencion where id_cola_atencion=id_at) <> 'en espera' THEN 
+				  id_tram:=generarIDTramite();
+				  id_c:=(select id_cliente from cola_atencion where id_cola_atencion=id_at);
+				  insert into tramite(id_tramite, id_cliente, id_cola_atencion, tipo_tramite, f_inicio_gestion, descripcion, estado)
+			      values(id_tram, id_c, id_at, tipo_de_tramite, CURRENT_TIMESTAMP, descr, 'iniciado');
+			      
+			      return id_tram;
+			      
+
+		else  
+			 	  insert into error(id_error, operacion, f_error, motivo) 
+				  values(generarIDError(), 'alta tramite', CURRENT_TIMESTAMP, '? id de cola de atención no válido');
+				 
+				  return id_tram;
+		
+		end if;
+
+		end;
+		$$ language plpgsql;
+
+
+----
+- `finalizacion_llamado():` Cumple la función de recibir por parámetro un id de cola de atención, comprobando 
+que dicho registro exista en la tabla y que su estado sea `en linea`. Si las verificaciones son correctas, 
+marca el llamado como `finalizado`, registrando la fecha y hora de finalización de la atención. 
+Si alguna validación falla, devuelve un mensaje de error y retorna `false`, de lo contrario, la función retorna `true` 
+indicando que el llamado se ha finalizado exitosamente.
+[source,sql]
+----
+create or replace function finalizacion_llamado(ca_id int) returns boolean as $$
+
+declare
+
+begin
+    
+    -- Que el id de cola exista. En caso de que no cumpla, se debe cargar un error con el mensaje ?id de cola no válida.
+    if not exists (select 1 from cola_atencion where id_cola_atencion = ca_id) then
+        insert into error values (generarIDError(), 'fin llamado', null, ca_id, null, null, null, null, current_timestamp, 'id de cola de atencion no valido');
+        return false;
+    end if;
+
+    --que el estado del llamado sea en linea, de ser distinto se carga un error con el mensaje ?el llamado no esta en linea
+    if exists (select 1 from cola_atencion where id_cola_atencion = ca_id and estado != 'en linea') then
+        insert into error values (generarIDError(), 'fin llamado', null, ca_id, null, null, null, null, current_timestamp, 'el llamado no esta en linea');
+        return false;
+    end if;
+
+    -- actualiza la fila de la cola de atencion con el id que se obtuvo
+    update cola_atencion set f_fin_atencion = current_timestamp,
+			     estado = 'finalizado' 
+	where id_cola_atencion = ca_id;
+	
+    return true;
+
+end;
+$$ language plpgsql;
+
+----
+- `trigger reporte_rendimiento_operadores():` Siendo la única función del tipo trigger del programa, tiene la 
+finalidad de actualizar el rendimiento de los operadores, se ejecuta antes de cada actualización o nuevo registro sobre 
+la relación `cola_atencion`. La implementación planteada se divide en dos casos (ambos son representadas en dos funciones 
+distintas), si la atención del operador termina en estado `desistido` o `finalizado`. En ambos casos, se verifica que 
+haya un registro en la tabla `rendimiento_operadore` que coincida con el id del operador y la fecha actual, si existe, 
+simplemente se actualiza los valores del tiempo total y promedio de los llamados en “general” y luego de los llamados 
+desistidos o finalizados, según sea el caso. En caso de no existir, se crea un nuevo registro asignando los valores 
+correspondientes a la tabla. Si el registro actualizado/creado en la cola de atención no está en estado `finalizado` o 
+`desistido` o si lo esta pero no tiene operador asignado, no se realiza ninguna operación.
+[source,sql]
+----
+create or replace function reporte_rendimiento_operadore() returns trigger as $$
+begin
+	case
+		when new.estado = 'finalizado' then
+
+			perform reportar_rendimiento_llamado_finalizado(new);
+
+		when new.estado = 'desistido' and new.id_operadore is not null then
+		
+			perform reportar_rendimiento_llamado_desistido(new);
+			
+		else 
+
+			-- no ejecuta nada
+			
+	end case;
+
+	return new;
+
+end;
+$$ language plpgsql;
+
+----
+
+Respecto a la base de datos no relacional (BoltDB), se optó por separar toda la funcionalidad en un paquete aparte
+llamado `db_bolt`, cuyos archivos se encuentran almacenados en la carpeta del mismo nombre. En ella se hallan tres
+archivos de código go de los cuales se destacan los siguientes métodos públicos:
+
+- `CargarDatosEnBoltDB():` Perteneciente al archivo `cargar-datos.go`, contiene los structs que modelan los datos
+del problema, se llama a métodos privados que se encargan de almacenar en la base de datos la información correspondiente
+a los clientes, operadores, llamados y trámites. Dicha información se obtiene de la lectura de archivos de formato JSON
+ubicados en la carpeta "archivos_json".
+[source,go]
+----
+func CargarDatosEnBoltDB() {
+    db, err := bolt.Open("db_bolt/Centro_de_Atencion_Telefonica.db", 0600, nil)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+	cargarClientes(db)
+	cargarOperadores(db)
+	cargarLlamados(db)
+	cargarTramites(db)
+}
+----
+- `MostrarDatosDeBoltDB():` Ubicado en el archivo `leer-datos.go`, llama a métodos privados que se encargan de mostrar
+por pantalla la información de los clientes, operadores, llamados y trámites.
+[source,go]
+----
+func MostrarDatosDeBoltDB() {
+	db, err := bolt.Open("db_bolt/Centro_de_Atencion_Telefonica.db", 0600, nil)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    mostrarClientes(db)
+    mostrarOperadores(db)
+    mostrarLlamados(db)
+    mostrarTramites(db)
+
+}
+----
+- `CrearUpdate():` Localizado en `manejo-de-buckets.go`, abre una transacción "read-write" que guarda un par clave - valor 
+en el bucket pasado por parámetro, de no existir el bucket deseado, se crea uno. Esta función es utilizada repetidas veces 
+por los métodos privados de `CargarDatosEnBoltDB()` dado que es la encargada de cargar la información en la base de datos.
+
+[source,go]
+----
+func CrearUpdate(db *bolt.DB, bucketName string, key []byte, val []byte) error {
+    // abre transacción de escritura
+    tx, err := db.Begin(true)
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
+
+    b, _ := tx.CreateBucketIfNotExists([]byte(bucketName))
+
+    err = b.Put(key, val)
+    if err != nil {
+        return err
+    }
+
+    // cierra transacción
+    if err := tx.Commit(); err != nil {
+        return err
+    }
+
+    return nil
+}
+----
+- `MostrarDatosBucket()`: También ubicado en `manejo-de-buckets.go`, inicia una transacción "read-only" que dado un 
+nombre de bucket pasado por parametro, por cada clave - valor, lo muestra por pantalla. Función utilizada múltiples veces 
+por los métodos privados de `MostrarDatosDeBoltDB()` permitiendo imprimir por consola la información solicitada.
+[source,go]
+----
+func MostrarDatosBucket(db * bolt.DB, bucketName string) error {
+    // abre una transacción de lectura
+    err := db.View(func(tx *bolt.Tx) error {
+        b := tx.Bucket([]byte(bucketName))
+        if errForEach := b.ForEach(func(k, v []byte) error {
+        	fmt.Printf("ID: %s.  Datos: %s \n", k, v)
+        	return nil
+        }); errForEach != nil {
+        	return errForEach
+        }
+        return nil
+    })
+    return err
+	
+}
+----
+
+== Conclusiones
+
+Se trató de aplicar todo el conocimiento visto en la materia respeto a las bases de datos relacionales y además, 
+se buscó seguir las buenas prácticas de programación como nombres declarativos, métodos lo más simples posibles y 
+realizar las diversas funciones en archivos separados. Esto permitió que la mayoría de los códigos fuente sean mas 
+legibles para el equipo, favoreciendo a los integrantes de su comprensión, mejoras de las funcionalidades y búsqueda 
+de errores.
+
+Este trabajo brindó al equipo de una experiencia práctica donde se reforzaron conocimientos y habilidades respecto a 
+la programación de stored procedures y el uso de triggers, este último fue interesante implementar dado a que es un 
+tipo de función que tiene un comportamiento peculiar al ser una operación que no se llama explícitamente sino que, 
+del resultado de una actualización de una tabla, se puede desencadenar en otras acciones o funcionalidades. Además, 
+permitió la introducción y uso del lenguaje GO para el menú principal y el acceso al paquete de bases de datos 
+no relacional, BoltDB donde también se pudo notar las diferencias entre NoSQL y SQL, destacándose principalmente 
+por ser un sistema simple y fácil de implementar pero con poco nivel de detalle y complejidad como lo puede llegar 
+a tener una base de datos relacional.

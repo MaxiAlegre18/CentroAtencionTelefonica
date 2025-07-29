@@ -1,0 +1,35 @@
+[
+	{
+		"IdTramite": 1,
+		"IdCliente": 4,
+		"IdColaAtencion": 1,
+		"TipoTramite": "consulta",
+		"FechaInicioGestion": "2024-11-22T16:36:25Z",
+		"Descripcion": "¿Es posible suspender temporalmente el servicio por 2 meses? (vacaciones)",
+		"FechaFinGestion": "2024-11-22T17:23:11Z",
+		"Respuesta": "Es posible suspender el servicio, avisando con 20 días de anticipación.",
+		"Estado": "solucionado"
+	},
+	{
+		"IdTramite": 2,
+		"IdCliente": 4,
+		"IdColaAtencion": 1,
+		"TipoTramite": "reclamo",
+		"FechaInicioGestion": "2024-11-22T16:41:25Z",
+		"Descripcion": "El monto de la última factura fue debitado dos veces en la tarjeta de crédito.",
+		"FechaFinGestion": "2024-11-22T17:23:11Z",
+		"Respuesta": "Los dos cobros corresponden a facturas de meses diferentes.",
+		"Estado": "rechazado"
+	},
+	{
+		"IdTramite": 3,
+		"IdCliente": 12,
+		"IdColaAtencion": 2,
+		"TipoTramite": "reclamo",
+		"FechaInicioGestion": "2024-11-22T16:42:41Z",
+		"Descripcion": "El servicio no funciona desde el mediodía. ",
+		"FechaFinGestion": "2024-11-22T16:59:33Z",
+		"Respuesta": "El area se encuentra afectada por mantenimiento.",
+		"Estado": "solucionado"
+	}
+]

@@ -1,0 +1,26 @@
+[
+	{
+		"IdOperadore": 1,
+		"Nombre": "Wilhelm",
+		"Apellido": "Steinitz",
+		"Dni": 5053058,
+		"FechaIngreso": "2018-05-14T00:00:00Z",
+		"Disponible": true
+	},
+	{
+		"IdOperadore": 2,
+		"Nombre": "Emanuel",
+		"Apellido": "Lasker",
+		"Dni": 24610127,
+		"FechaIngreso": "2018-12-24T00:00:00Z",
+		"Disponible": true
+	},
+	{
+		"IdOperadore": 3,
+		"Nombre": "Jose Raul",
+		"Apellido": "Capablanca",
+		"Dni": 9068298,
+		"FechaIngreso": "2019-11-19T00:00:00Z",
+		"Disponible": true
+	}
+]

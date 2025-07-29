@@ -1,0 +1,2 @@
+drop database if exists alegre_galvan_madariaga_meira_db1;
+create database alegre_galvan_madariaga_meira_db1;

@@ -1,0 +1,182 @@
+[
+	{
+		"IdCliente": 1,
+		"Nombre": "Ken",
+		"Apellido": "Thompson",
+		"Dni": 5153057,
+		"FechaNacimiento": "1995-05-05T00:00:00Z",
+		"Telefono": "15-2889-7948",
+		"Email": "ken@thompson.org"
+	},
+	{
+		"IdCliente": 2,
+		"Nombre": "Dennis",
+		"Apellido": "Ritchie",
+		"Dni": 25610126,
+		"FechaNacimiento": "1995-04-11T00:00:00Z",
+		"Telefono": "15-7811-5045",
+		"Email": "dennis@ritchie.org"
+	},
+	{
+		"IdCliente": 3,
+		"Nombre": "Donald",
+		"Apellido": "Knuth",
+		"Dni": 9168297,
+		"FechaNacimiento": "1984-04-05T00:00:00Z",
+		"Telefono": "15-2780-6005",
+		"Email": "don@knuth.org"
+	},
+	{
+		"IdCliente": 4,
+		"Nombre": "Rob",
+		"Apellido": "Pike",
+		"Dni": 4915593,
+		"FechaNacimiento": "1946-08-16T00:00:00Z",
+		"Telefono": "15-1114-9719",
+		"Email": "rob@pike.org"
+	},
+	{
+		"IdCliente": 5,
+		"Nombre": "Douglas",
+		"Apellido": "McIlroy",
+		"Dni": 33187055,
+		"FechaNacimiento": "1939-06-09T00:00:00Z",
+		"Telefono": "15-9625-0245",
+		"Email": "douglas@mcilroy.org"
+	},
+	{
+		"IdCliente": 6,
+		"Nombre": "Brian",
+		"Apellido": "Kernighan",
+		"Dni": 13897948,
+		"FechaNacimiento": "1992-11-22T00:00:00Z",
+		"Telefono": "15-6410-6066",
+		"Email": "brian@kernighan.org"
+	},
+	{
+		"IdCliente": 7,
+		"Nombre": "Bill",
+		"Apellido": "Joy",
+		"Dni": 34115045,
+		"FechaNacimiento": "1954-02-04T00:00:00Z",
+		"Telefono": "15-4215-8655",
+		"Email": "bill@joy.org"
+	},
+	{
+		"IdCliente": 8,
+		"Nombre": "Marshall Kirk",
+		"Apellido": "McKusick",
+		"Dni": 9806005,
+		"FechaNacimiento": "1995-12-27T00:00:00Z",
+		"Telefono": "15-5197-4379",
+		"Email": "marshall_kirk@mckusick.org"
+	},
+	{
+		"IdCliente": 9,
+		"Nombre": "Theo",
+		"Apellido": "de Raadt",
+		"Dni": 5149719,
+		"FechaNacimiento": "1950-02-07T00:00:00Z",
+		"Telefono": "15-6470-9444",
+		"Email": "theo@deraadt.org"
+	},
+	{
+		"IdCliente": 10,
+		"Nombre": "Cristina",
+		"Apellido": "Kirchner",
+		"Dni": 6250245,
+		"FechaNacimiento": "1990-08-17T00:00:00Z",
+		"Telefono": "15-5291-0113",
+		"Email": "cfk@fpv.gov.ar"
+	},
+	{
+		"IdCliente": 11,
+		"Nombre": "Diego",
+		"Apellido": "Maradona",
+		"Dni": 19158655,
+		"FechaNacimiento": "1985-02-27T00:00:00Z",
+		"Telefono": "15-3361-4854",
+		"Email": "diego@dios.com.ar"
+	},
+	{
+		"IdCliente": 12,
+		"Nombre": "Martín",
+		"Apellido": "Palermo",
+		"Dni": 5974379,
+		"FechaNacimiento": "1918-06-09T00:00:00Z",
+		"Telefono": "15-9877-3169",
+		"Email": "martin@palermo.com.ar"
+	},
+	{
+		"IdCliente": 13,
+		"Nombre": "Guillermo",
+		"Apellido": "Barros Schelotto",
+		"Dni": 3910113,
+		"FechaNacimiento": "1982-05-03T00:00:00Z",
+		"Telefono": "15-5020-5695",
+		"Email": "guille@melli.com.ar"
+	},
+	{
+		"IdCliente": 14,
+		"Nombre": "Susú",
+		"Apellido": "Pecoraro",
+		"Dni": 7547862,
+		"FechaNacimiento": "1935-04-03T00:00:00Z",
+		"Telefono": "15-6695-9505",
+		"Email": "susu@pecoraro.com.ar"
+	},
+	{
+		"IdCliente": 15,
+		"Nombre": "Norma",
+		"Apellido": "Aleandro",
+		"Dni": 26614854,
+		"FechaNacimiento": "1992-03-18T00:00:00Z",
+		"Telefono": "15-9155-4115",
+		"Email": "norma@aleandro.com.ar"
+	},
+	{
+		"IdCliente": 16,
+		"Nombre": "Soledad",
+		"Apellido": "Silveyra",
+		"Dni": 7773169,
+		"FechaNacimiento": "1957-07-28T00:00:00Z",
+		"Telefono": "15-9184-4522",
+		"Email": "sole@silveyra.com.ar"
+	},
+	{
+		"IdCliente": 17,
+		"Nombre": "Libertad",
+		"Apellido": "Lamarque",
+		"Dni": 32205695,
+		"FechaNacimiento": "1971-03-07T00:00:00Z",
+		"Telefono": "15-6363-9690",
+		"Email": "libertad@lamarque.com.ar"
+	},
+	{
+		"IdCliente": 18,
+		"Nombre": "Ana María",
+		"Apellido": "Picchio",
+		"Dni": 19020903,
+		"FechaNacimiento": "1946-08-06T00:00:00Z",
+		"Telefono": "15-4819-2117",
+		"Email": "ana.maria@picchio.com.ar"
+	},
+	{
+		"IdCliente": 19,
+		"Nombre": "Niní",
+		"Apellido": "Marshall",
+		"Dni": 10535508,
+		"FechaNacimiento": "1951-09-07T00:00:00Z",
+		"Telefono": "15-9799-6045",
+		"Email": "nini@marshall.com"
+	},
+	{
+		"IdCliente": 20,
+		"Nombre": "Claudia",
+		"Apellido": "Lapacó",
+		"Dni": 30934609,
+		"FechaNacimiento": "1961-08-03T00:00:00Z",
+		"Telefono": "15-2005-4879",
+		"Email": "claudia@lapaco.com.ar"
+	}
+]

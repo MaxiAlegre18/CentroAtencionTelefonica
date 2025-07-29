@@ -1,0 +1,29 @@
+[
+	{
+		"IdColaAtencion": 1,
+		"IdCliente": 4,
+		"FechaInicioLlamado": "2024-11-22T16:32:20Z",
+		"IdOperadore": 1,
+		"FechaInicioAtencion": "2024-11-22T16:34:12Z",
+		"FechaFinAtencion": "2024-11-22T16:43:20Z",
+		"Estado": "finalizado"
+	},
+	{
+		"IdColaAtencion": 2,
+		"IdCliente": 12,
+		"FechaInicioLlamado": "2024-11-22T16:36:20Z",
+		"IdOperadore": 2,
+		"FechaInicioAtencion": "2024-11-22T16:38:53Z",
+		"FechaFinAtencion": "2024-11-22T16:45:10Z",
+		"Estado": "finalizado"
+	},
+	{
+		"IdColaAtencion": 3,
+		"IdCliente": 16,
+		"FechaInicioLlamado": "2024-11-22T18:10:34Z",
+		"IdOperadore": 1,
+		"FechaInicioAtencion": "2024-11-22T18:12:03Z",
+		"FechaFinAtencion": "2024-11-22T18:15:28Z",
+		"Estado": "finalizado"
+	}
+]
