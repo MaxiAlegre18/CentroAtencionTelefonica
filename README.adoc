@@ -1,16 +1,4 @@
-= Informe del trabajo practico de BD1
-
-Autores:
-
-- Maximiliano Alegre <maxialegre2003@gmail.com>
-
-- Pablo Galvan <pablogalvan15plus@gmail.com>
-
-- Mariana Madariaga <marianamad97@gmail.com>
-
-- Matias Meira <matiasmeiraeeuu@gmail.com>
-
-v1, {docdate}. Docentes Daniel Bertaccini y Hernán Rondelli (COM-02)
+= Informe del trabajo practico de Bases de Datos I
 
 == Introducción
 
